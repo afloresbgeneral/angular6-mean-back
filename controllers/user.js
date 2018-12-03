@@ -1,6 +1,9 @@
 'use strict'
 //cargando modulos
 var bcrypt = require('bcrypt-nodejs');
+var fs = require('fs');
+var path = require('path');
+
 //cargando modelos
 var userModel = require('../models/user');
 
@@ -130,11 +133,150 @@ function login(req, res) {
     });
 }
 
+function updateUser(req, res) {
+
+
+    var userId = req.params.id;
+    var update = req.body;
+
+    if(userId != req.user.sub){
+        res.status(500).send({
+            message: 'No tienes permiso para editar este usuario',
+        });
+    }
+
+    userModel.findByIdAndUpdate(userId, update, {new: true}, (err, userUpdated) => {
+        if(err){
+            res.status(500).send({
+                message: 'Error al actualizar el usuario',
+            });
+        } else {
+            console.log(userUpdated);
+            if(!userUpdated){
+                res.status(404).send({
+                    message: 'No se ha podido actualizar el usuario',
+                });
+            } else {
+                res.status(200).send({
+                    message: 'Usuario actualizado correctamente',
+                    user: userUpdated
+                });
+            }
+        }
+    });
+}
+
+function uploadImage(req, res) {
+
+    var userId = req.params.id;
+    var fileName = 'no subido...';
+    console.log(req.files, 'reeqq');
+    if (req.files){
+        var filePath = req.files.image.path;
+        var fileSplit = filePath.split('/');
+        var fileName = fileSplit[2];
+        var ext_split = fileName.split('.');
+        var fileExt = ext_split[1];
+
+
+        if(fileExt == 'png' || fileExt == 'jpg' || fileExt == 'jpeg' || fileExt == 'gif') {
+
+            if(userId != req.user.sub){
+                res.status(500).send({
+                    message: 'No tienes permiso para editar este usuario',
+                });
+            }
+        
+            userModel.findByIdAndUpdate(userId, {image: fileName}, {new: true}, (err, userUpdated) => {
+                if(err){
+                    res.status(500).send({
+                        message: 'Error al actualizar el usuario',
+                    });
+                } else {
+                    console.log(userUpdated);
+                    if(!userUpdated){
+                        res.status(404).send({
+                            message: 'No se ha podido actualizar el usuario',
+                        });
+                    } else {
+                        res.status(200).send({
+                            message: 'Imagen actualizada correctamente',
+                            user: userUpdated,
+                            image: fileName
+                        });
+                    }
+                }
+            });
+
+        } else {
+            fs.unlink(filePath, (err) => {
+                if(err) {
+                    res.status(401).send({
+                        message: 'Extension no valida y fichero no borrado'
+                    });
+                } else {
+                    res.status(401).send({
+                        message: 'Extension no valida'
+                    });
+                }
+            });
+
+        }
+
+    } else {
+        res.status(200).send({
+            message: 'No se ha subido un fichero'
+        });
+    }
+}
+
+    function getImageFile(req, res){
+
+        var imageFile = req.params.imageFile;
+        var pathFile = './uploads/users/'+imageFile;
+
+        fs.exists(pathFile, (exist) => {
+            if(exist){
+                res.sendFile(path.resolve(pathFile));
+            } else {
+                res.status(404).send({
+                    message: 'imagen no existe'
+                });
+            }
+        })
+     }
+
+     function getKeepers(req, res) {
+
+        userModel.find({role: 'ROLE_ADMIN'}).exec((err, users) => {
+            if(err) {
+                res.status(500).send({
+                    message: 'Error en la petición'
+                });
+            } else {
+                if(!users){
+                    res.status(404).send({
+                        message: 'No hay cuidadores'
+                    });
+                } else {
+                    res.status(200).send({
+                        message: 'lista de cuidadores',
+                        keepers: users
+                    });
+                }
+            }  
+        });
+     }
+
 
 //exportacion
 module.exports = {
     pruebas,
     test,
     addUser,
-    login
+    login,
+    updateUser,
+    uploadImage,
+    getImageFile,
+    getKeepers
 }

@@ -1,14 +1,14 @@
 'use strict'
 
 var mongoose = require('mongoose');
-var schema = mongoose.schema;
+var schema = mongoose.Schema;
 
 var animalSchema = schema({
     name: String,
     description: String,
-    year: number,
+    year: Number,
     image: String,
-    user: { type: Schema.ObjectId, ref: 'User'}
+    user: { type: schema.ObjectId, ref: 'User'}
 });
 
  module.exports = mongoose.model('Animal', animalSchema);
