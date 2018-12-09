@@ -4,6 +4,8 @@ var mongoose = require('mongoose');
 var app = require('./app');
 var port = process.env.PORT || 3789;
 
+console.log(port, 'puertoo');
+
 mongoose.Promise = global.Promise;
 mongoose.connect('mongodb://localhost:27017/zoo', {useNewUrlParser: true})
     .then(

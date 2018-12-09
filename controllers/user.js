@@ -25,11 +25,12 @@ function test (req, res) {
 }
 
 function addUser(req, res){
+    console.log('hello grom the');
     //crear objeto de usuario
     var user = new userModel();
     //recoger los parametros que llegan de la peticion (body)
     var params = req.body;
-    console.log(params);
+    console.log(params, 'params');
 
     //asignar los valores al usuario con los recibidos
     if (params.password && params.name && params.lastName && params.email) {
