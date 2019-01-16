@@ -64,7 +64,7 @@ function addUser(req, res){
                           res.status(404).send({message: 'No se ha registrado el usuario'});
                           } else {
                               res.status(200).send({
-                                  message: 'succesfull',
+                                  message: 'Se ha registrado corretamente el usuario',
                                   user: userStored
                               });
                           }
@@ -73,7 +73,6 @@ function addUser(req, res){
                 } else {
                     res.status(200).send({
                         message: 'El usuario introducido ya existe en la base de datos',
-                        something: user
                     });
                 }
             }
@@ -82,7 +81,6 @@ function addUser(req, res){
     } else {
         res.status(200).send({
             message: 'Introduce los datos correctamente para poder registar al usuario',
-            something: user
         });
     }
 }
