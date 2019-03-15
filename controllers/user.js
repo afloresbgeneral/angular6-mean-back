@@ -11,21 +11,21 @@ var userModel = require('../models/user');
 var jwt = require('../services/jwt');
 
 //funciones
-function pruebas (req, res) {
+function pruebasAuth(req, res) {
     res.status(200).send({
         message: 'Probando el controlador de usuarios y la accion pruebassss',
         user: req.user
     });
 }
 
-function test (req, res) {
+function test(req, res) {
     res.status(200).send({
-        message: 'Probando el controlador de usuarios y la accion test'
+        message: 'Probando el controlador de usuarios y la accion test sin autenticacion'
     });
 }
 
-function addUser(req, res){
-    console.log('hello grom the');
+function addUser(req, res) {
+    console.log('hello from the');
     //crear objeto de usuario
     var user = new userModel();
     //recoger los parametros que llegan de la peticion (body)
@@ -46,30 +46,32 @@ function addUser(req, res){
             if (err) {
                 res.status(500).send({
                     message: 'Error al comprobar el usuario'
-                });   
+                });
             } else {
-                if(!issetUser) {
-                     //cifrando la contraseña
-                     bcrypt.hash(params.password, null, null, function(err, hash){
-                      user.password = hash;
-                  });
-                  //guardando usuario en base de datos
-                  user.save((err, userStored)=>{
-                      if(err){
-                          res.status(500).send({
-                              message: 'Error al guardar el usuario'
-                          });   
-                      } else {
-                          if(!userStored){
-                          res.status(404).send({message: 'No se ha registrado el usuario'});
-                          } else {
-                              res.status(200).send({
-                                  message: 'Se ha registrado corretamente el usuario',
-                                  user: userStored
-                              });
-                          }
-                      }
-                  });
+                if (!issetUser) {
+                    //cifrando la contraseña
+                    bcrypt.hash(params.password, null, null, function (err, hash) {
+                        user.password = hash;
+                    });
+                    //guardando usuario en base de datos
+                    user.save((err, userStored) => {
+                        if (err) {
+                            res.status(500).send({
+                                message: 'Error al guardar el usuario'
+                            });
+                        } else {
+                            if (!userStored) {
+                                res.status(404).send({
+                                    message: 'No se ha registrado el usuario'
+                                });
+                            } else {
+                                res.status(200).send({
+                                    message: 'Se ha registrado corretamente el usuario',
+                                    user: userStored
+                                });
+                            }
+                        }
+                    });
                 } else {
                     res.status(200).send({
                         message: 'El usuario introducido ya existe en la base de datos',
@@ -77,7 +79,7 @@ function addUser(req, res){
                 }
             }
         });
- 
+
     } else {
         res.status(200).send({
             message: 'Introduce los datos correctamente para poder registar al usuario',
@@ -96,11 +98,11 @@ function login(req, res) {
         if (err) {
             res.status(500).send({
                 message: 'Error al comprobar el usuario'
-            });   
+            });
         } else {
-            if(issetUser) {
+            if (issetUser) {
                 bcrypt.compare(password, issetUser.password, (err, check) => {
-                    if(check) {
+                    if (check) {
 
                         //comprobando el token 
                         if (params.gettoken) {
@@ -108,18 +110,18 @@ function login(req, res) {
                             res.status(200).send({
                                 message: 'generating token',
                                 token: jwt.createToken(issetUser)
-                            });  
+                            });
                         } else {
                             res.status(200).send({
                                 message: 'user found',
                                 user: issetUser
-                            });   
+                            });
                         }
 
                     } else {
                         res.status(200).send({
                             message: 'wrong password',
-                        }); 
+                        });
                     }
                 });
 
@@ -137,21 +139,23 @@ function updateUser(req, res) {
 
     var userId = req.params.id;
     var update = req.body;
-
-    if(userId != req.user.sub){
+    console.log(update, 'update object');
+    if (userId != req.user.sub) {
         res.status(500).send({
             message: 'No tienes permiso para editar este usuario',
         });
     }
 
-    userModel.findByIdAndUpdate(userId, update, {new: true}, (err, userUpdated) => {
-        if(err){
+    userModel.findByIdAndUpdate(userId, update, {
+        new: false
+    }, (err, userUpdated) => {
+        if (err) {
             res.status(500).send({
                 message: 'Error al actualizar el usuario',
             });
         } else {
             console.log(userUpdated);
-            if(!userUpdated){
+            if (!userUpdated) {
                 res.status(404).send({
                     message: 'No se ha podido actualizar el usuario',
                 });
@@ -169,8 +173,9 @@ function uploadImage(req, res) {
 
     var userId = req.params.id;
     var fileName = 'no subido...';
-    console.log(req.files, 'reeqq');
-    if (req.files){
+    console.log('reeqq', req.files);
+    if (req.files) {
+        console.log('INSIDE');
         var filePath = req.files.image.path;
         var fileSplit = filePath.split('/');
         var fileName = fileSplit[2];
@@ -178,30 +183,33 @@ function uploadImage(req, res) {
         var fileExt = ext_split[1];
 
 
-        if(fileExt == 'png' || fileExt == 'jpg' || fileExt == 'jpeg' || fileExt == 'gif') {
+        if (fileExt == 'png' || fileExt == 'jpg' || fileExt == 'jpeg' || fileExt == 'gif') {
 
-            if(userId != req.user.sub){
+            if (userId != req.user.sub) {
                 res.status(500).send({
                     message: 'No tienes permiso para editar este usuario',
                 });
             }
-        
-            userModel.findByIdAndUpdate(userId, {image: fileName}, {new: true}, (err, userUpdated) => {
-                if(err){
+
+            userModel.findByIdAndUpdate(userId, {
+                image: fileName
+            }, {
+                new: true
+            }, (err, userUpdated) => {
+                if (err) {
                     res.status(500).send({
                         message: 'Error al actualizar el usuario',
                     });
                 } else {
                     console.log(userUpdated);
-                    if(!userUpdated){
+                    if (!userUpdated) {
                         res.status(404).send({
                             message: 'No se ha podido actualizar el usuario',
                         });
                     } else {
                         res.status(200).send({
                             message: 'Imagen actualizada correctamente',
-                            user: userUpdated,
-                            image: fileName
+                            user: userUpdated
                         });
                     }
                 }
@@ -209,7 +217,7 @@ function uploadImage(req, res) {
 
         } else {
             fs.unlink(filePath, (err) => {
-                if(err) {
+                if (err) {
                     res.status(401).send({
                         message: 'Extension no valida y fichero no borrado'
                     });
@@ -229,53 +237,62 @@ function uploadImage(req, res) {
     }
 }
 
-    function getImageFile(req, res){
+function getUsersTest(req, res) {
+    res.status(200).send({
+        users: userModel.id
+    });
+}
 
-        var imageFile = req.params.imageFile;
-        var pathFile = './uploads/users/'+imageFile;
+function getImageFile(req, res) {
+    console.log('req', req);
+    var imageFile = req.params.imageFile;
+    var pathFile = './uploads/users/' + imageFile;
 
-        fs.exists(pathFile, (exist) => {
-            if(exist){
-                res.sendFile(path.resolve(pathFile));
-            } else {
+    fs.exists(pathFile, (exist) => {
+        if (exist) {
+            res.sendFile(path.resolve(pathFile));
+        } else {
+            res.status(404).send({
+                message: 'imagen no existe'
+            });
+        }
+    })
+}
+
+function getKeepers(req, res) {
+
+    userModel.find({
+        role: 'ROLE_ADMIN'
+    }).exec((err, users) => {
+        if (err) {
+            res.status(500).send({
+                message: 'Error en la petición'
+            });
+        } else {
+            if (!users) {
                 res.status(404).send({
-                    message: 'imagen no existe'
+                    message: 'No hay cuidadores'
+                });
+            } else {
+                res.status(200).send({
+                    message: 'lista de cuidadores',
+                    keepers: users
                 });
             }
-        })
-     }
-
-     function getKeepers(req, res) {
-
-        userModel.find({role: 'ROLE_ADMIN'}).exec((err, users) => {
-            if(err) {
-                res.status(500).send({
-                    message: 'Error en la petición'
-                });
-            } else {
-                if(!users){
-                    res.status(404).send({
-                        message: 'No hay cuidadores'
-                    });
-                } else {
-                    res.status(200).send({
-                        message: 'lista de cuidadores',
-                        keepers: users
-                    });
-                }
-            }  
-        });
-     }
+        }
+    });
+}
 
 
 //exportacion
 module.exports = {
-    pruebas,
+    pruebasAuth,
     test,
     addUser,
     login,
     updateUser,
     uploadImage,
     getImageFile,
-    getKeepers
+    getKeepers,
+    getUsersTest
 }

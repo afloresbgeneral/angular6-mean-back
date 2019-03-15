@@ -8,6 +8,7 @@ var app = express();
 // cargar rutas
 var user_routes = require('./routes/user');
 var animal_routes = require('./routes/animal');
+var test_routes = require('./routes/test');
 
 // middlewares de body-parseruse
 app.use(bodyParser.urlencoded({extended:true}));
@@ -26,11 +27,13 @@ app.use((req, res, next) => {
 //configuracion de rutas base
 app.use('/api', user_routes);
 app.use('/api', animal_routes);
+app.use('/api', test_routes);
 
+console.log('somethingaa');
 
-// app.get('/probando',(req, res)=>{
-//     res.status(200).send({message: 'Este es el metodo probando'})
-// });
+app.get('/probando',(req, res)=>{
+    res.status(200).send({message: 'Este es el metodo probandoaaa'})
+});
 
 //Exportar el modulo
 module.exports = app;
