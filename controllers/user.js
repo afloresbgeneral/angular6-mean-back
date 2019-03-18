@@ -105,7 +105,7 @@ function login(req, res) {
                     if (check) {
 
                         //comprobando el token 
-                        if (params.gettoken) {
+                        if (params.getToken) {
                             //generando el token
                             res.status(200).send({
                                 message: 'generating token',
@@ -139,6 +139,9 @@ function updateUser(req, res) {
 
     var userId = req.params.id;
     var update = req.body;
+
+    delete update.password;
+    console.log('hey listen')
     console.log(update, 'update object');
     if (userId != req.user.sub) {
         res.status(500).send({
@@ -147,7 +150,7 @@ function updateUser(req, res) {
     }
 
     userModel.findByIdAndUpdate(userId, update, {
-        new: false
+        new: true
     }, (err, userUpdated) => {
         if (err) {
             res.status(500).send({
