@@ -187,24 +187,24 @@ function uploadImage(req, res) {
 
 
         if (fileExt == 'png' || fileExt == 'jpg' || fileExt == 'jpeg' || fileExt == 'gif') {
-
+            console.log('REQ USERR', req.user);
             if (userId != req.user.sub) {
                 res.status(500).send({
                     message: 'No tienes permiso para editar este usuario',
                 });
             }
 
-            userModel.findByIdAndUpdate(userId, {
-                image: fileName
-            }, {
-                new: true
-            }, (err, userUpdated) => {
+            userModel.findByIdAndUpdate(userId,
+                {image: fileName},
+                {new: true},
+                (err, userUpdated) => {
                 if (err) {
                     res.status(500).send({
                         message: 'Error al actualizar el usuario',
                     });
                 } else {
-                    console.log(userUpdated);
+                    console.log('-----------------------User: ',userUpdated);
+                    console.log('-----------------------', fileName);
                     if (!userUpdated) {
                         res.status(404).send({
                             message: 'No se ha podido actualizar el usuario',

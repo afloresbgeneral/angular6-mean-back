@@ -16,7 +16,7 @@ api.post('/register', userController.addUser);
 api.post('/login', userController.login);
 api.put('/update-user/:id', mdAuth.ensureAuth, userController.updateUser);
 api.post('/upload-image-user/:id', [mdAuth.ensureAuth, mdUpload], userController.uploadImage);
-api.get('/get-image-file/:imageFile', mdAuth.ensureAuth, userController.getImageFile);
+api.get('/get-image-file/:imageFile', userController.getImageFile);
 api.get('/get-keepers', userController.getKeepers);
 api.get('/get-users', userController.getUsersTest);
 

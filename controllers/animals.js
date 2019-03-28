@@ -16,7 +16,6 @@ function pruebas (req, res) {
 }
 
 function saveAnimal(req, res) {
-
     var animal = new animalModel();
     var params = req.body;
     console.log(params, 'params');
@@ -88,7 +87,8 @@ function findAnimal(req, res){
                     message: 'No hay animales registrados',
                 });
             } else {
-                res.status(400).send({
+                console.log('FROM FIND!!!!!!!', animal);
+                res.status(200).send({
                     message: 'Successfull',
                     animal: animal
                 });
@@ -101,11 +101,12 @@ function updateAnimal(req, res) {
     //obteniendo el id desde el url
     var animalId = req.params.id;
     var updateAnimal = req.body;
-
-    console.log(updateAnimal);
+    console.log('-------***********+.------*****', updateAnimal);
 
     animalModel.findByIdAndUpdate(animalId, updateAnimal, {new: true}, (err, animalUpdated) => {
         if(err) {
+            console.log(err, '****---***-*** ERROR DENTRO DE BACK');
+
             res.status(400).send({
                 message: 'Error al conectarse al servidor'
             });
@@ -117,7 +118,7 @@ function updateAnimal(req, res) {
             } else {
                 res.status(200).send({
                     message: 'Animal editado correctamente',
-                    animalUpdated: animalUpdated
+                    animal: animalUpdated
                 });
             }
         }
@@ -129,8 +130,8 @@ function uploadImage(req, res) {
     //obteniendo el id por parametros del url
     var animalId = req.params.id;
     var fileName = 'no subido';
-
     if(req.files){
+        console.log('inside req.files')
         //obteniendo direccion del archivo y 
         //separando por cadenas para obtener nombre y extension
         var filePath = req.files.image.path;
@@ -142,12 +143,17 @@ function uploadImage(req, res) {
         //validando por extension
         if(fileExt == 'png' || fileExt == 'jpg' || fileExt == 'jpeg' || fileExt == 'gif') {
 
-            animalModel.findByIdAndUpdate(animalId, {image: fileName}, {new: true}, (err, animalUpdated) => {
+            animalModel.findByIdAndUpdate(animalId,
+                {image: fileName},
+                {new: true},
+                (err, animalUpdated) => {
                 if(err) {
                     res.status(400).send({
                         message: 'Error al conectarse al servicio',
                     });
                 } else {
+                    console.log('-----------------------', animalUpdated);
+                    console.log('-----------------------', fileName);
                     if(!animalUpdated) {
                         res.status(400).send({
                             message: 'No se ha podido actualizar la imagen',
